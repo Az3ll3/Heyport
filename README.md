@@ -224,7 +224,7 @@ recon_output/target.com/YYYYMMDD_HHMMSS/
 
 ## Author
 
-Built by **[Crypto-void787](https://github.com/Crypto-void787)** — bug bounty hunter & security researcher.
+Built by **[Hackr Az3ll3](https://github.com/Az3ll3)** — bug bounty hunter & security researcher.
 
 ---
 
