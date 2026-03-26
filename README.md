@@ -79,6 +79,7 @@ python3 heyport.py -t target.com
 ## Installation
 
 ```bash
+
 # Clone the repo
 git clone https://github.com/Az3ll3/Heyport.git
 cd Heyport
@@ -87,6 +88,7 @@ cd Heyport
 chmod +x installation.sh
 
 # Run automated setup (installs all dependencies)
+# Installing dependencies gonna take a while grab a coffee ☕
 ./installation.sh
 # Restart your shell once its done to load new PATH variables
 
