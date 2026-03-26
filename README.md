@@ -23,13 +23,11 @@
 </p>
 
 <p align="center">
-  <a href="#quick-start">Quick Start</a> •
   <a href="#features">Features</a> •
   <a href="#installation">Installation</a> •
   <a href="#usage">Usage</a> •
   <a href="#output">Output</a> •
   <a href="docs/how-it-works.md">How It Works</a> •
-  <a href="INSTALL.md">Full Install Guide</a>
 </p>
 <!-- markdownlint-enable MD033 MD045 -->
 
@@ -39,24 +37,11 @@
 
 Before HeyPort, a recon session looked like this: open 6 terminals, run tools in the wrong order, pipe output manually between them, forget to save something, end up with 15 disconnected text files — **two hours before you even started testing anything.**
 
-HeyPort collapses that entire workflow into one command.
+HeyPort collapses that entire workflow into one command as:
 
 ```bash
 python3 heyport.py -t target.com
 ```
-
----
-
-## Pipeline Overview
-
-| Phase | Name | Mode | What Happens |
-| ----- | ---- | ---- | ------------ |
-| 1 | Target Overview | Passive | DNS records, WHOIS, IP/ASN/Geo, Shodan passive, org OSINT, breach check |
-| 2 | Subdomain Enumeration | Passive + Active | Zone transfer, brute force (3 engines), 10 passive sources, smart mutations |
-| 3 | Active Filtering | Active | DNS resolution, HTTP probing (14 ports), tier classification, WAF, takeover scan |
-| 4 | Scanning | Active | All 65535 ports via RustScan→nmap, tech detection (webanalyze + whatweb) |
-| 5 | Vulnerability Mapping | Active | nuclei (Critical/High + Medium), dalfox XSS hunting |
-| — | Report | Output | Self-contained HTML dashboard + recon_map.json |
 
 ---
 
@@ -91,61 +76,26 @@ python3 heyport.py -t target.com
 
 ---
 
-## Quick Start
+## Installation
 
 ```bash
 # Clone the repo
-git clone https://github.com/Crypto-void787/heyport.git
-cd heyport
+git clone https://github.com/Az3ll3/HeyPort.git
+cd HeyPort
 
-# Install Python dependency
-pip3 install requests --break-system-packages
+# Give execution permission to automated installer
+chmod +x installation.sh
 
-# Check all tools are ready
+# Run automated setup (installs all dependencies)
+./installation.sh
+# Restart your shell once its done to load new PATH variables
+
+# Verify tools are installed
 python3 heyport.py --check-tools
 
-# Run recon
+# Start full recon
 python3 heyport.py -t target.com
 ```
-
-> Full installation guide with every tool: **[INSTALL.md](INSTALL.md)**
-
----
-
-## Installation
-
-HeyPort requires **19 external tools**. Quick install for Kali Linux:
-
-```bash
-# Core dependencies
-sudo apt install -y golang-go cargo rustup nmap gobuster dnsrecon whatweb whois dnsutils
-
-# Add Go to PATH (critical)
-echo 'export PATH=/root/go/bin:$PATH' >> ~/.zshrc && source ~/.zshrc
-
-# Go tools
-go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
-go install -v github.com/projectdiscovery/dnsx/cmd/dnsx@latest
-go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
-go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
-go install -v github.com/projectdiscovery/alterx/cmd/alterx@latest
-go install github.com/d3mondev/puredns/v2@latest
-go install github.com/tomnomnom/assetfinder@latest
-go install github.com/haccer/subjack@latest
-go install github.com/rverton/webanalyze@latest
-go install github.com/hahwul/dalfox/v2@latest
-
-# Rust tools
-cargo install rustscan
-
-# Python tools
-pip3 install bbot wafw00f --break-system-packages
-
-# Update nuclei templates
-nuclei -update-templates
-```
-
-> Step-by-step guide with PATH setup and verification: **[INSTALL.md](INSTALL.md)**
 
 ---
 
@@ -166,6 +116,8 @@ python3 heyport.py -t target.com --skip-vuln
 
 # Verify all tools are installed
 python3 heyport.py --check-tools
+
+# HAPPY HACKING!! 😀
 ```
 
 ---
@@ -194,15 +146,6 @@ recon_output/target.com/YYYYMMDD_HHMMSS/
 └── p5_dalfox_xss.txt               ← Confirmed XSS POCs
 ```
 
-### Tier Classification
-
-| Tier | Label | Criteria |
-| ---- | ----- | -------- |
-| ★ 1 | HIGH PRIORITY | Juicy keyword hit OR takeover risk OR year-prefix (`2017-x`) OR alive + no WAF |
-| 2 | ACTIVE | HTTP responds on any port |
-| 3 | DNS ONLY | Resolves but no HTTP response — scan for non-HTTP services |
-| 4 | INACTIVE | Does not resolve |
-
 ---
 
 ## Tested On
@@ -217,17 +160,16 @@ recon_output/target.com/YYYYMMDD_HHMMSS/
 
 > **For authorized security research only.**
 > Only use HeyPort against targets you have explicit written permission to test.
-> Running recon against systems without authorization is illegal in most jurisdictions.
 > The author is not responsible for any misuse.
 
 ---
 
 ## Author
 
-Built by **[Hackr Az3ll3](https://github.com/Az3ll3)** — bug bounty hunter & security researcher.
+Built by **[Hackr Az3ll3](https://github.com/Az3ll3)**, bug bounty hunter & security researcher.
 
 ---
 
 ## License
 
-[MIT](LICENSE) — free to use, modify, and distribute with attribution.
+[MIT](LICENSE) free to use, modify, and distribute with attribution.
