@@ -80,8 +80,8 @@ python3 heyport.py -t target.com
 
 ```bash
 # Clone the repo
-git clone https://github.com/Az3ll3/HeyPort.git
-cd HeyPort
+git clone https://github.com/Az3ll3/Heyport.git
+cd Heyport
 
 # Give execution permission to automated installer
 chmod +x installation.sh
