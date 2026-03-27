@@ -73,6 +73,7 @@ python3 heyport.py -t target.com
 - Single self-contained HTML report — dark theme, interactive, everything connected
 - Structured `recon_map.json` for piping into other tools
 - Priority target list (`p3_tier1_priority.txt`) — open and start hacking immediately
+- Ctrl+C handling: first Ctrl+C completes the current phase, then stops the session and saves partial results (including `recon_map.json` + the HTML report); second Ctrl+C force-exits immediately.
 
 ---
 
