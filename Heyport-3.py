@@ -35,7 +35,7 @@ USAGE:
   python3 heyport.py --check-tools
 """
 
-import subprocess, sys, os, json, socket, argparse, datetime, re
+import subprocess, sys, os, json, socket, argparse, datetime, re, signal
 import concurrent.futures
 from pathlib import Path
 from collections import defaultdict
@@ -45,6 +45,24 @@ try:
 except ImportError:
     print("[!] Run: pip install requests")
     sys.exit(1)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# GRACEFUL INTERRUPT HANDLER
+# ═══════════════════════════════════════════════════════════════════════════
+_interrupted = False
+
+def _handle_interrupt(sig, frame):
+    global _interrupted
+    if _interrupted:
+        # Second Ctrl+C — force quit immediately
+        os._exit(1)
+    _interrupted = True
+    print(f"\n\n  \033[93m[!]\033[0m  Interrupted — wrapping up current task...")
+    print(f"  \033[93m[!]\033[0m  Skipping remaining phases, saving what we got...")
+    print(f"  \033[2m      Hang tight — writing files + generating report...\033[0m")
+    print(f"  \033[2m      Press Ctrl+C again to force quit (results may be incomplete)\033[0m\n")
+
+signal.signal(signal.SIGINT, _handle_interrupt)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -91,6 +109,8 @@ def run(cmd, timeout=300, silent=False):
     except subprocess.TimeoutExpired:
         if not silent: warn(f"Timeout: {cmd[:60]}...")
         return "", "TIMEOUT"
+    except KeyboardInterrupt:
+        return "", "INTERRUPTED"
     except Exception as e:
         return "", str(e)
 
@@ -2596,21 +2616,44 @@ Examples:
     if run_all or args.phase == 1:
         phase1(target, out, rmap)
 
-    if run_all or args.phase == 2:
+    if not _interrupted and (run_all or args.phase == 2):
         phase2(target, out, rmap)
 
-    if run_all or args.phase == 3:
+    if not _interrupted and (run_all or args.phase == 3):
         phase3(out, rmap)
 
-    if run_all or args.phase == 4:
+    if not _interrupted and (run_all or args.phase == 4):
         phase4(target, out, rmap)
 
-    if (run_all or args.phase == 5) and not args.skip_vuln:
+    if not _interrupted and (run_all or args.phase == 5) and not args.skip_vuln:
         phase5(out, rmap)
+
+    # Always generate report — even if interrupted mid-run
+    # Whatever was collected so far gets saved
+    if _interrupted:
+        print(f"\n  {C.YELLOW}[!]{C.RESET}  Writing collected subdomains to disk...")
+        print(f"  {C.YELLOW}[!]{C.RESET}  Building HTML report from partial data...")
+        print(f"  {C.YELLOW}[!]{C.RESET}  Almost done — do not close the terminal...\n")
 
     generate_html_report(rmap, out)
     print_summary(target, out, rmap, start_time)
 
+    if _interrupted:
+        print(f"\n  {C.GREEN}[+]{C.RESET}  {C.BOLD}All partial results saved successfully.{C.RESET}")
+        print(f"  {C.GREEN}[+]{C.RESET}  Output folder  → {C.CYAN}{out}{C.RESET}")
+        print(f"  {C.GREEN}[+]{C.RESET}  Open report    → {C.CYAN}xdg-open {out}/recon_report.html{C.RESET}\n")
+        sys.exit(0)
+
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        # Caught here if interrupt happened outside a phase (e.g. during startup)
+        print(f"\n  {C.YELLOW}[!]{C.RESET}  Scan cancelled.\n")
+        sys.exit(0)
+    except SystemExit:
+        raise
+    except Exception as e:
+        print(f"\n  {C.RED}[!]{C.RESET}  Unexpected error: {e}\n")
+        sys.exit(1)
