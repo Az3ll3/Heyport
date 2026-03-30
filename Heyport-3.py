@@ -50,20 +50,21 @@ except ImportError:
 # GRACEFUL INTERRUPT HANDLER
 # ═══════════════════════════════════════════════════════════════════════════
 _interrupted = False
-
+ 
 def _handle_interrupt(sig, frame):
     global _interrupted
     if _interrupted:
-        # Second Ctrl+C — force quit immediately
+        print(f"\n  \033[91m\033[1m[✘] Force quit.\033[0m\n")
         os._exit(1)
     _interrupted = True
-    print(f"\n\n  \033[93m[!]\033[0m  Interrupted — wrapping up current task...")
-    print(f"  \033[93m[!]\033[0m  Skipping remaining phases, saving what we got...")
-    print(f"  \033[2m      Hang tight — writing files + generating report...\033[0m")
-    print(f"  \033[2m      Press Ctrl+C again to force quit (results may be incomplete)\033[0m\n")
-
+    print(f"\n")
+    print(f"  \033[91m\033[1m[✘] CTRL+C detected\033[0m")
+    print(f"  \033[92m\033[1m[✔] Saving all collected data...\033[0m")
+    print(f"  \033[92m[✔] Generating partial report...\033[0m")
+    print(f"  \033[93m[!] Press Ctrl+C again to force quit immediately\033[0m")
+    print(f"")
+ 
 signal.signal(signal.SIGINT, _handle_interrupt)
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # TERMINAL COLORS
@@ -2631,17 +2632,16 @@ Examples:
     # Always generate report — even if interrupted mid-run
     # Whatever was collected so far gets saved
     if _interrupted:
-        print(f"\n  {C.YELLOW}[!]{C.RESET}  Writing collected subdomains to disk...")
-        print(f"  {C.YELLOW}[!]{C.RESET}  Building HTML report from partial data...")
-        print(f"  {C.YELLOW}[!]{C.RESET}  Almost done — do not close the terminal...\n")
-
+        print(f"  {C.RED}{C.BOLD}[✘] Scan interrupted{C.RESET}")
+        print(f"  {C.RED}{C.BOLD}[✔] Building partial report from collected data...{C.RESET}\n")
+ 
     generate_html_report(rmap, out)
     print_summary(target, out, rmap, start_time)
-
+ 
     if _interrupted:
-        print(f"\n  {C.GREEN}[+]{C.RESET}  {C.BOLD}All partial results saved successfully.{C.RESET}")
-        print(f"  {C.GREEN}[+]{C.RESET}  Output folder  → {C.CYAN}{out}{C.RESET}")
-        print(f"  {C.GREEN}[+]{C.RESET}  Open report    → {C.CYAN}xdg-open {out}/recon_report.html{C.RESET}\n")
+        print(f"\n  {C.RED}{C.BOLD}[✘] Partial report saved → {out}/recon_report.html{C.RESET}")
+        print(f"  {C.RED}[✘] Data saved          → {out}/recon_map.json{C.RESET}")
+        print(f"\n  {C.CYAN}[*] Re-run with --phase N to continue from where you left off{C.RESET}\n")
         sys.exit(0)
 
 
